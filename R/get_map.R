@@ -37,7 +37,7 @@
 #'        }    
 #' 
 #' @name get_background
-#' @rdname osmserver-package
+#' @rdname gis_server-package
 #' @examples
 #' ###########################################################
 #'

@@ -1,0 +1,12 @@
+export(get_background,
+       validate_mapid,
+       display_map_info,
+       display_map,
+       delete_map)
+
+import(RSQLite,
+       DBI,
+       sp,
+       raster,
+       rgdal,
+       rgeos)

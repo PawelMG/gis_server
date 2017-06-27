@@ -372,7 +372,7 @@ validate_mapid <- function(map_data = "W:/DANE/Dane_OpenStreetMap/Serwer_map")
 #' @keywords internal
 #' @return db a SQLiteConnection object.
 
-establish_con <- function(map_data = "W:/DANE/Dane_OpenStreetMap/Serwer_map",
+establish_con <- function(map_data = "data",
                           mapdb_name = "MapID")
   
 {	
