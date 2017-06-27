@@ -1,0 +1,168 @@
+#####################################################################
+# get_background function
+#####################################################################
+
+#' Locally storing and rendering OSM maps.
+#'
+#' The \code{get_background} function loads and plots pre-rendered map background. 
+#'
+#' @param map_data a path to the directory including maps.
+#' @param xy a data frame of network graph's coordinates, with columns labelled 'Longitude' and 'Latitude'.
+#' @param mapdb_name a character string with the name of the map database.
+#' @param proj a string specifying the geographic projection of the network graph, e.g. "+init=epsg:4326".
+#' @param init_proj a string specifying the geographic projection of the map database (by default "+init=epsg:4326").
+#' @param options_list a set of mainly graphical parameters used by the rendering engine: 
+#'        \describe{    
+#'          \item{mscale}{specifies the scale of the map, e.g. 5000 stands for 1:5000 map,}
+#'          \item{url}{an url to a map view on osm.org can be provided to define the bounding box if no coordinates are provided,}
+#'          \item{wld}{this option specifies whether a so called world file should be printed; a world file explicitly specifies the
+#'                     extent of a generated raster object; this option defaults to FALSE, as normally the coordinates are stored in the
+#'                     map database,}
+#'          \item{dpi}{a parameter specifying the optical resolution of the output map; default value is 200,}
+#'          \item{paper}{an optional parameter specifying paper size of the output map, e.g 'a+4'; usually this option is not used,
+#'                       as the map size is the product of scale, resolution and spatial extent,}
+#'          \item{margin}{a parameter specifying the margin around the extent of the input object expressed as percent of the difference between xmax and xmin and ymax and ymin,}
+#'          \item{size}{target map dimensions in mm (W x H, one 0 allowed),}
+#'          \item{xmstyle}{mandatory argument, the full path to the xml style file for mapnik,}
+#'          \item{output}{mandatory argument, specifies the name and most importantly the extension of the file;
+#'                        default output format has been set to JPEG.}
+#'          \item{tiles}{Write n x n tiles, then join using imagemagick montage command; this argument is used if the size of the map 
+#'                       exceeds maximal mapnik output size; default value is FALSE; CAUTION: .pdf files can be output directly,
+#'                       but are not valid for tiling, for a city the size of e.g. Szczecin (Poland) the highest available map scale
+#'                       is ca. 1:7000.}
+#'          \item{just_tiles}{Do not join tiles, instead write ozi/wld file for each; used only in conjunction with 'tiles',
+#'                            defaults to FALSE.}
+#'          \item{force_rend}{If there is no map fulfilling the desired criteria and the parameter is set to FALSE, there will be no attempt at
+#'                            rendering. If the parameter is set as TRUE, a map with specified criteria will be rendered.}
+#'        }    
+#' 
+#' @name get_background
+#' @rdname osmserver-package
+#' @examples
+#' ###########################################################
+#'
+#' # Declaring the map server directory
+#'
+#' map_data = "W:/DANE/Dane_OpenStreetMap/Serwer_map"
+#'
+#' # Generating artificial points
+#'
+#' Longitude <- runif(100, min = 15.5126,  15.6268)
+#' Latitude <- runif(100, min = 54.1476,  54.1925)
+#' xy <- as.data.frame(cbind(Longitude, Latitude))
+#'
+#' # Setting the projection of the graph coordinates (proj) and the projection of the underlying map (init_proj)
+#'
+#' proj = "+init=epsg:4326" 
+#' init_proj = "+init=epsg:4326" # default OSM coordinate reference system
+#'
+#' options_list  <- list(mscale = 15000,
+#'                       url = NULL,
+#'                       wld = FALSE,
+#'                       dpi = 200,
+#'                       paper = NULL,
+#'                       margin = 0.05,
+#'                       size = NULL,
+#'                       xmstyle = "C:/GIS_data/osm_mapnik/gis.xml",
+#'                       output  = "map.jpeg",
+#'                       tiles = FALSE,
+#'                       just_tiles = FALSE,
+#'						 force_rend = TRUE)
+#'
+#' # Fetching the map background
+#'
+#' get_background(xy = xy,
+#'               map_data = map_data,
+#'               proj = proj,
+#'               init_proj = init_proj,
+#'               options_list = options_list)
+#'
+#' # Plotting the points on the background
+#'
+#' points(xy, col = 'red', lwd = 3)
+#'
+#' ###########################################################
+
+get_background <- function(xy, map_data, mapdb_name = "MapID", proj, init_proj, options_list = NULL)
+{
+  
+  # Specifying default rendering options
+  
+  def_options  <-  list(mscale = 50000,
+                        url = NULL,
+                        wld = FALSE,
+                        dpi = 150,
+                        paper = NULL,
+                        margin = 0.05,
+                        size = NULL,
+                        xmstyle = "C:/GIS_data/osm_mapnik/gis.xml",
+                        output  = "map.jpeg",
+                        tiles = FALSE,
+                        just_tiles = FALSE,
+                        force_rend = FALSE)
+  
+  
+  # Checking if specified options are correct
+  if (!is.null(options_list)) {
+    fitting_options <- which(names(options_list) %in% names(def_options))
+    if (length(fitting_options) < length(options_list)) {
+      warning('Unrecognised options were specified')
+    }
+    
+    # Overwriting default options
+    mo <- match(names(options_list[fitting_options]), names(def_options))
+    def_options[mo] <- options_list[fitting_options]
+    options_list <- def_options
+  }
+  
+  # Coordinates of the network nodes are being transformed to the coordinate reference system of the map 
+  # The bounding box (extent) is being constructed, and the database is queried for maps that encompass the graph
+  
+  coordinates(xy) <- ~Longitude + Latitude
+  proj4string(xy) <- CRS(proj)
+  xy <- spTransform(xy, CRSobj = init_proj)
+  ext_map <- extent(xy)
+  ext_map <- extent_margin(ext_map = ext_map,
+                           margin = options_list$margin)
+  
+  
+  db <- establish_con(map_data = map_data,
+                      mapdb_name = mapdb_name)
+  
+  mapl <- check_map(db = db,
+                    ext_map = ext_map,
+                    options_list = options_list)
+  
+  if (!(length(mapl) > 1)){
+    if(options_list$force_rend == TRUE){
+      print("There is no map in the database covering the desired area or parameters. An attempt will be made to render the map.")  
+      
+      render_map(options_list = options_list,
+                 map_data = map_data,
+                 ext_map = ext_map,
+                 db = db)
+      
+      mapl <- save_map(options_list = options_list,
+                       init_proj = init_proj,
+                       ext_map = ext_map,
+                       map_data = map_data,
+                       db = db)
+      
+      dbDisconnect(db)
+      
+      load_map(mapl = mapl,
+               map_data = map_data,
+               ext_map = ext_map)				 
+    }
+    if(options_list$force_rend == FALSE){
+      print("There is no map in the database satisfying the criteria")
+      dbDisconnect(db)
+    }
+  }
+  
+  if ((length(mapl) > 1)){
+    load_map(mapl = mapl,
+             map_data = map_data,
+             ext_map = ext_map)	    
+  }
+}
