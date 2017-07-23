@@ -48,9 +48,8 @@
 #' @examples
 #' ###########################################################
 #'
-#' # Declaring the map server directory
-#'
-#' map_data = "inst/extdata"
+#' # Loading the package
+#' library(gisserver)
 #'
 #' # Generating artificial points
 #'
@@ -75,23 +74,20 @@
 #'                       tiles = FALSE,
 #'                       just_tiles = FALSE,
 #'						           force_rend = TRUE)
-#'
+#' 
 #' # Fetching the map background
 #'
 #' get_background(xy = xy,
-#'               map_data = "inst/extdata",
+#'               map_data = "extdata",
 #'               mapdb_name = "MapID.db",
 #'               proj = proj,
 #'               init_proj = init_proj,
 #'               options_list = options_list)
-#'
+#' 
 #' # Plotting the points on the background
 #'
 #' points(xy, col = 'red', lwd = 3)
 #' 
-#' # Removing databsase connection
-#' dbDisconnect(db)
-#'
 #' ###########################################################
 
 get_background <- function(xy, map_data = "inst/extdata", mapdb_name = "MapID.db", proj, init_proj, options_list = NULL)
@@ -129,16 +125,15 @@ get_background <- function(xy, map_data = "inst/extdata", mapdb_name = "MapID.db
   # Coordinates of the network nodes are being transformed to the coordinate reference system of the map 
   # The bounding box (extent) is being constructed, and the database is queried for maps that encompass the graph
   
-  coordinates(xy) <- ~Longitude + Latitude
-  proj4string(xy) <- CRS(proj)
-  xy <- spTransform(xy, CRSobj = init_proj)
-  ext_map <- extent(xy)
+  sp::coordinates(xy) <- ~Longitude + Latitude
+  sp::proj4string(xy) <- sp::CRS(proj)
+  xy <- sp::spTransform(xy, CRSobj = init_proj)
+  ext_map <- raster::extent(xy)
   ext_map <- extent_margin(ext_map = ext_map,
                            margin = options_list$margin)
   
   
-  db <- establish_con(map_data = "inst/extdata",
-                      mapdb_name = "MapID.db")
+  db <- establish_con(map_data , mapdb_name)
   
   mapl <- check_map(db = db,
                     ext_map = ext_map,

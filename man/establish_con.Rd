@@ -4,7 +4,7 @@
 \alias{establish_con}
 \title{Establish connection to the map database (default name 'MapID').}
 \usage{
-establish_con(map_data = "inst/extdata", mapdb_name = "MapID.db")
+establish_con(map_data = "extdata", mapdb_name = "MapID.db")
 }
 \arguments{
 \item{map_data}{a character string with the path to the folder 

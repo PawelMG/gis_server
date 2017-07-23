@@ -49,9 +49,8 @@ The \code{get_background} function loads and plots pre-rendered map background.
 \examples{
 ###########################################################
 
-# Declaring the map server directory
-
-map_data = "inst/extdata"
+# Loading the package
+library(gisserver)
 
 # Generating artificial points
 
@@ -80,7 +79,7 @@ options_list  <- list(mscale = 29000,
 # Fetching the map background
 
 get_background(xy = xy,
-              map_data = "inst/extdata",
+              map_data = "extdata",
               mapdb_name = "MapID.db",
               proj = proj,
               init_proj = init_proj,
@@ -89,9 +88,6 @@ get_background(xy = xy,
 # Plotting the points on the background
 
 points(xy, col = 'red', lwd = 3)
-
-# Removing databsase connection
-dbDisconnect(db)
 
 ###########################################################
 }

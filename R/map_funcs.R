@@ -16,7 +16,7 @@
 
 check_map <- function(db, ext_map, options_list = NULL) 
 {
-  mapl <- dbGetQuery(db, paste0("SELECT * FROM Maplist WHERE bbox1<='", ext_map[1],
+  mapl <- RSQLite::dbGetQuery(db, paste0("SELECT * FROM Maplist WHERE bbox1<='", ext_map[1],
                                 "' AND bbox2<='", ext_map[3],
                                 "' AND bbox3>='", ext_map[2],
                                 "' AND bbox4>='", ext_map[4],
@@ -200,7 +200,7 @@ save_map <- function(db, init_proj, ext_map, map_data, options_list = NULL)
 load_map <- function(mapl, map_data, ext_map)
 {
   # Loading the file
-  gmap <- brick(paste0(map_data,"/Tiles_",mapl$mdir,"/",mapl$mfile,".",mapl$extens))
+  gmap <- brick( system.file(paste0(map_data,"/Tiles_",mapl$mdir), paste0(mapl$mfile,".",mapl$extens), package = "gisserver" ))
   
   # Assigning spatial attributes to the map
   ext <- extent(c(mapl$bbox1, mapl$bbox3, mapl$bbox2, mapl$bbox4))
@@ -375,20 +375,14 @@ validate_mapid <- function(map_data = "inst/extdata")
 #' @return db a SQLiteConnection object.
 #' @export
 
-establish_con <- function(map_data = "inst/extdata",
-                          mapdb_name = "MapID.db")
-  
-{	
-  if (!file.exists(paste0(map_data,"/",mapdb_name))) {
-    stop("Database 'mapdb_name' does not exist at 'map_data' directory!", call. = TRUE)
-  }
-  
-  drv <- DBI::dbDriver("SQLite")
-  db <- dbConnect(drv, dbname = paste0(map_data, "/", mapdb_name))
-  
-  return(db)
-}
-
+establish_con <- function(map_data = "extdata",
+                             mapdb_name = "MapID.db")
+   { 
+     drv <- DBI::dbDriver("SQLite")
+     db <- RSQLite::dbConnect(drv, dbname = system.file(paste0(map_data), paste0(mapdb_name), package = "gisserver"))
+ 
+     return(db)
+   }
 
 #####################################################################
 # Extent_margin function
@@ -403,6 +397,7 @@ establish_con <- function(map_data = "inst/extdata",
 #' @param margin a percentage measure of extent expansion versus the plotted object (0.1 is 10\%).
 #' @keywords internal
 #' @return ext_map an object of the spatial class 'extent'.
+
 
 extent_margin <- function(ext_map, margin)
 {
