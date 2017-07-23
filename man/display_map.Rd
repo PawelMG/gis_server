@@ -4,8 +4,7 @@
 \alias{display_map}
 \title{Load and plot map file given the database record ID.}
 \usage{
-display_map(id, map_data = "W:/DANE/Dane_OpenStreetMap/Serwer_map",
-  mapdb_name = "MapID")
+display_map(id, map_data = "inst/extdata", mapdb_name = "MapID.db")
 }
 \arguments{
 \item{id}{an integer holding the number of the record in the map database.}
@@ -18,13 +17,4 @@ database.}
 \description{
 The \code{display_map} function loads the map raster background and plots it
 using the R graphics device.
-}
-\examples{
-###########################################################
-# Displaying the map database
-display_map_info()
-
-# Displaying the chosen map	
-display_map(id = 50)
-###########################################################
 }

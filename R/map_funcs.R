@@ -40,7 +40,6 @@ check_map <- function(db, ext_map, options_list = NULL)
 #' The \code{render_map} passes the bounding box and the graphical parameters of the 
 #' required map background to the mapnik rendering engine. The map is rendered by mapnik
 #' based on OpenStreetMap data stored in a local PostgreSQL database. 
-#'
 #' @param map_data  a character string with the path to the folder storing the map data.
 #' @param db 	    a SQLiteConnection object that specifies the connection to the database.
 #' @param ext_map   a spatial object of class 'extent' from the 'raster' package
@@ -221,8 +220,9 @@ load_map <- function(mapl, map_data, ext_map)
 #' and prints them.
 #' 
 #' @param map_data a character string with the path to the folder storing the map data.
+#' @export
 
-display_map_info <- function(map_data = "W:/DANE/Dane_OpenStreetMap/Serwer_map")
+display_map_info <- function(map_data = "inst/extdata")
 {
   # Switching to the server map folder and establishing connection with database
   db <- establish_con(map_data)
@@ -246,8 +246,9 @@ display_map_info <- function(map_data = "W:/DANE/Dane_OpenStreetMap/Serwer_map")
 #' @param id a numeric indicating the primary key (ID) of the database entry
 #'           concerning a specific map. 
 #' @param map_data a character string with the path to the folder storing the map data.
+#' @export
 
-delete_map <- function(id, map_data = "W:/DANE/Dane_OpenStreetMap/Serwer_map")
+delete_map <- function(id, map_data = "inst/extdata")
 {
   # Switching to the server map folder and establishing connection with database
   db <- establish_con(map_data)
@@ -275,9 +276,10 @@ delete_map <- function(id, map_data = "W:/DANE/Dane_OpenStreetMap/Serwer_map")
 #' rendered.
 #' 
 #' @param map_data a character string with the path to the folder storing the map data,
-#' a default value has been set in the function.                    
+#' a default value has been set in the function.   
+#' @export                 
 
-validate_mapid <- function(map_data = "W:/DANE/Dane_OpenStreetMap/Serwer_map")
+validate_mapid <- function(map_data = "inst/extdata")
 {
   # Switching to the server map folder and establishing connection with database
   db <- establish_con(map_data)
@@ -289,7 +291,7 @@ validate_mapid <- function(map_data = "W:/DANE/Dane_OpenStreetMap/Serwer_map")
   
   # Fetching the full file paths based on a query from the server map directories
   filel <- list.files(path = map_data, recursive = TRUE, full.names = TRUE)
-  filel <- setdiff(filel, paste0(map_data, "/MapID"))
+  filel <- setdiff(filel, paste0(map_data, "/MapID.db"))
   
   # Function creating a full file name based on the name stored in the database
   pathname <- function(x){
@@ -371,13 +373,14 @@ validate_mapid <- function(map_data = "W:/DANE/Dane_OpenStreetMap/Serwer_map")
 #'  				 database.
 #' @keywords internal
 #' @return db a SQLiteConnection object.
+#' @export
 
-establish_con <- function(map_data = "data",
-                          mapdb_name = "MapID")
+establish_con <- function(map_data = "inst/extdata",
+                          mapdb_name = "MapID.db")
   
 {	
   if (!file.exists(paste0(map_data,"/",mapdb_name))) {
-    stop("Database 'mapdb_name' does not exist at 'map_data' directory!", call. = FALSE)
+    stop("Database 'mapdb_name' does not exist at 'map_data' directory!", call. = TRUE)
   }
   
   drv <- DBI::dbDriver("SQLite")
@@ -385,7 +388,7 @@ establish_con <- function(map_data = "data",
   
   return(db)
 }
-NULL
+
 
 #####################################################################
 # Extent_margin function
@@ -427,18 +430,11 @@ extent_margin <- function(ext_map, margin)
 #' @param map_data a character string with the path to the folder storing the map data.
 #' @param mapdb_name a character string with the name of the map 
 #'  				 database.
-#' @examples
-#' ###########################################################
-#' # Displaying the map database
-#' display_map_info()
-#'
-#' # Displaying the chosen map	
-#' display_map(id = 50)
-#' ###########################################################
+#' @export
 
 display_map <- function(id,
-                        map_data = "W:/DANE/Dane_OpenStreetMap/Serwer_map",
-                        mapdb_name = "MapID")
+                        map_data = "inst/extdata",
+                        mapdb_name = "MapID.db")
 {
   # Establishing connection with the database
   db <- establish_con(map_data = map_data,

@@ -4,13 +4,14 @@ Type: Package
 Title: Package facilitating the use of open map data
 Version: 0.1.0
 Date: 27.06.2017
-Author: PaweÅ‚ GoÅ‚Ä™biowski
-Maintainer: PaweÅ‚ GoÅ‚Ä™biowski <golebiowski.pawel@gmail.com>
+Author: Pawe³ Go³êbiowski
+Maintainer: Pawe³ Go³êbiowski <golebiowski.pawel@gmail.com>
 Description: Package serves to facilitate the use of open map data to overlay custom shapes
              with geographic attributes on a topographic map background layer.
 License_restricts_use: yes
 License: file LICENCE
-Copyright: PaweÅ‚ GoÅ‚Ä™biowski
+Copyright: Pawe³ Go³êbiowski
 LazyData: yes
 Imports: RSQLite, DBI, sp, raster, rgdal, rgeos
 RoxygenNote: 6.0.1
+Suggests: testthat

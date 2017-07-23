@@ -4,7 +4,7 @@
 \alias{validate_mapid}
 \title{Check that stored map info is not corrupt.}
 \usage{
-validate_mapid(map_data = "W:/DANE/Dane_OpenStreetMap/Serwer_map")
+validate_mapid(map_data = "inst/extdata")
 }
 \arguments{
 \item{map_data}{a character string with the path to the folder storing the map data,

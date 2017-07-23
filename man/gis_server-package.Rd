@@ -4,8 +4,8 @@
 \alias{get_background}
 \title{Locally storing and rendering OSM maps.}
 \usage{
-get_background(xy, map_data, mapdb_name = "MapID", proj, init_proj,
-  options_list = NULL)
+get_background(xy, map_data = "inst/extdata", mapdb_name = "MapID.db", proj,
+  init_proj, options_list = NULL)
 }
 \arguments{
 \item{xy}{a data frame of network graph's coordinates, with columns labelled 'Longitude' and 'Latitude'.}
@@ -51,12 +51,12 @@ The \code{get_background} function loads and plots pre-rendered map background.
 
 # Declaring the map server directory
 
-map_data = "W:/DANE/Dane_OpenStreetMap/Serwer_map"
+map_data = "inst/extdata"
 
 # Generating artificial points
 
-Longitude <- runif(100, min = 15.5126,  15.6268)
-Latitude <- runif(100, min = 54.1476,  54.1925)
+Longitude <- runif(100, min =  20.9,  max = 21.05)
+Latitude <- runif(100, min = 52.2, max = 52.25)
 xy <- as.data.frame(cbind(Longitude, Latitude))
 
 # Setting the projection of the graph coordinates (proj) and the projection of the underlying map (init_proj)
@@ -64,23 +64,24 @@ xy <- as.data.frame(cbind(Longitude, Latitude))
 proj = "+init=epsg:4326" 
 init_proj = "+init=epsg:4326" # default OSM coordinate reference system
 
-options_list  <- list(mscale = 15000,
+options_list  <- list(mscale = 29000,
                       url = NULL,
                       wld = FALSE,
                       dpi = 200,
                       paper = NULL,
-                      margin = 0.05,
+                      margin = 0.01,
                       size = NULL,
                       xmstyle = "C:/GIS_data/osm_mapnik/gis.xml",
-                      output  = "map.jpeg",
+                      output  = "map.png",
                       tiles = FALSE,
                       just_tiles = FALSE,
-					 force_rend = TRUE)
+					           force_rend = TRUE)
 
 # Fetching the map background
 
 get_background(xy = xy,
-              map_data = map_data,
+              map_data = "inst/extdata",
+              mapdb_name = "MapID.db",
               proj = proj,
               init_proj = init_proj,
               options_list = options_list)
@@ -88,6 +89,9 @@ get_background(xy = xy,
 # Plotting the points on the background
 
 points(xy, col = 'red', lwd = 3)
+
+# Removing databsase connection
+dbDisconnect(db)
 
 ###########################################################
 }

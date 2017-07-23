@@ -4,7 +4,7 @@
 \alias{delete_map}
 \title{Erase map from the map server.}
 \usage{
-delete_map(id, map_data = "W:/DANE/Dane_OpenStreetMap/Serwer_map")
+delete_map(id, map_data = "inst/extdata")
 }
 \arguments{
 \item{id}{a numeric indicating the primary key (ID) of the database entry

@@ -38,17 +38,24 @@
 #' 
 #' @name get_background
 #' @rdname gis_server-package
+#' @export
+#' @import RSQLite
+#' @import DBI
+#' @import sp
+#' @import rgdal
+#' @import rgeos
+#' @import raster
 #' @examples
 #' ###########################################################
 #'
 #' # Declaring the map server directory
 #'
-#' map_data = "W:/DANE/Dane_OpenStreetMap/Serwer_map"
+#' map_data = "inst/extdata"
 #'
 #' # Generating artificial points
 #'
-#' Longitude <- runif(100, min = 15.5126,  15.6268)
-#' Latitude <- runif(100, min = 54.1476,  54.1925)
+#' Longitude <- runif(100, min =  20.9,  max = 21.05)
+#' Latitude <- runif(100, min = 52.2, max = 52.25)
 #' xy <- as.data.frame(cbind(Longitude, Latitude))
 #'
 #' # Setting the projection of the graph coordinates (proj) and the projection of the underlying map (init_proj)
@@ -56,23 +63,24 @@
 #' proj = "+init=epsg:4326" 
 #' init_proj = "+init=epsg:4326" # default OSM coordinate reference system
 #'
-#' options_list  <- list(mscale = 15000,
+#' options_list  <- list(mscale = 29000,
 #'                       url = NULL,
 #'                       wld = FALSE,
 #'                       dpi = 200,
 #'                       paper = NULL,
-#'                       margin = 0.05,
+#'                       margin = 0.01,
 #'                       size = NULL,
 #'                       xmstyle = "C:/GIS_data/osm_mapnik/gis.xml",
-#'                       output  = "map.jpeg",
+#'                       output  = "map.png",
 #'                       tiles = FALSE,
 #'                       just_tiles = FALSE,
-#'						 force_rend = TRUE)
+#'						           force_rend = TRUE)
 #'
 #' # Fetching the map background
 #'
 #' get_background(xy = xy,
-#'               map_data = map_data,
+#'               map_data = "inst/extdata",
+#'               mapdb_name = "MapID.db",
 #'               proj = proj,
 #'               init_proj = init_proj,
 #'               options_list = options_list)
@@ -80,10 +88,13 @@
 #' # Plotting the points on the background
 #'
 #' points(xy, col = 'red', lwd = 3)
+#' 
+#' # Removing databsase connection
+#' dbDisconnect(db)
 #'
 #' ###########################################################
 
-get_background <- function(xy, map_data, mapdb_name = "MapID", proj, init_proj, options_list = NULL)
+get_background <- function(xy, map_data = "inst/extdata", mapdb_name = "MapID.db", proj, init_proj, options_list = NULL)
 {
   
   # Specifying default rendering options
@@ -126,8 +137,8 @@ get_background <- function(xy, map_data, mapdb_name = "MapID", proj, init_proj, 
                            margin = options_list$margin)
   
   
-  db <- establish_con(map_data = map_data,
-                      mapdb_name = mapdb_name)
+  db <- establish_con(map_data = "inst/extdata",
+                      mapdb_name = "MapID.db")
   
   mapl <- check_map(db = db,
                     ext_map = ext_map,
