@@ -4,7 +4,7 @@
 \alias{display_map_info}
 \title{Display the list of available maps.}
 \usage{
-display_map_info(map_data = "inst/extdata")
+display_map_info(map_data = "extdata")
 }
 \arguments{
 \item{map_data}{a character string with the path to the folder storing the map data.}

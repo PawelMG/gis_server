@@ -222,17 +222,18 @@ load_map <- function(mapl, map_data, ext_map)
 #' @param map_data a character string with the path to the folder storing the map data.
 #' @export
 
-display_map_info <- function(map_data = "inst/extdata")
+display_map_info <- function(map_data = "extdata")
 {
   # Switching to the server map folder and establishing connection with database
   db <- establish_con(map_data)
   
   # Fetching and printing the entries 
   mapl <- dbGetQuery(db, "SELECT * FROM Maplist")
-  print (mapl)
   
   # Disconnect from the database
-  dbDisconnect(db)    
+  dbDisconnect(db)   
+  
+  return(mapl)
 }
 
 #####################################################################
@@ -279,7 +280,7 @@ delete_map <- function(id, map_data = "inst/extdata")
 #' a default value has been set in the function.   
 #' @export                 
 
-validate_mapid <- function(map_data = "inst/extdata")
+validate_mapid <- function(map_data = "extdata")
 {
   # Switching to the server map folder and establishing connection with database
   db <- establish_con(map_data)
@@ -428,7 +429,7 @@ extent_margin <- function(ext_map, margin)
 #' @export
 
 display_map <- function(id,
-                        map_data = "inst/extdata",
+                        map_data = "extdata",
                         mapdb_name = "MapID.db")
 {
   # Establishing connection with the database
@@ -439,7 +440,7 @@ display_map <- function(id,
   mapl <- dbGetQuery(db, paste0("SELECT * FROM Maplist WHERE ID=", id))
   
   # Loading the file
-  gmap <- brick(paste0(map_data,"/Tiles_",mapl$mdir,"/",mapl$mfile,".",mapl$extens))
+  gmap <- brick(system.file(paste0(map_data,"/Tiles_",mapl$mdir), paste0(mapl$mfile,".",mapl$extens), package = "gisserver" ))
   
   # Assigning spatial attributes to the map
   ext <- extent(c(mapl$bbox1, mapl$bbox3, mapl$bbox2, mapl$bbox4))

@@ -4,7 +4,7 @@
 \alias{display_map}
 \title{Load and plot map file given the database record ID.}
 \usage{
-display_map(id, map_data = "inst/extdata", mapdb_name = "MapID.db")
+display_map(id, map_data = "extdata", mapdb_name = "MapID.db")
 }
 \arguments{
 \item{id}{an integer holding the number of the record in the map database.}
