@@ -31,7 +31,7 @@ ext_map <- raster::extent(xy)
 ext_map <- extent_margin(ext_map = ext_map,
                          margin = options_list$margin)
 
-# Actal testing taking place here
+# Actual testing taking place here
 
 test_that("establish_con delivers a database connection",{
   expect_output(print(class(establish_con())), regexp = "SQLiteConnection*")
@@ -60,4 +60,14 @@ test_that("validate_mapid functions properly",{
     'gisserver::validate_mapid' = function() TRUE,
     expect_true(validate_mapid())
   )
+})
+
+test_that("extent_margin functions properly",{
+	  expect_equal(extent_margin(ext_map,0), ext_map)
+})
+
+test_that("load_map functions properly",{
+  mapl <- display_map_info(map_data = "extdata")
+  a <- class(load_map(mapl, map_data = "extdata", ext_map))
+  expect_equal(a, "NULL")
 })

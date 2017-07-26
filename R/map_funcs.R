@@ -130,21 +130,21 @@ save_map <- function(db, init_proj, ext_map, map_data, options_list = NULL)
   
   # Setting the storage path and filename  
   if (dbGetQuery(db, "SELECT COUNT(DISTINCT mdir) FROM Maplist") <= 1000){
-    mdir <- (dbGetQuery(db, "SELECT MAX(mdir) FROM Maplist") + 1)
-    mfile <- paste0((dbGetQuery(db, "SELECT MAX(mfile) FROM Maplist") + 1))
+    mdir <- paste0(RSQLite::dbGetQuery(db, "SELECT MAX(mdir) FROM Maplist") + 1)
+    mfile <- paste0((RSQLite::dbGetQuery(db, "SELECT MAX(mfile) FROM Maplist") + 1))
   }
   
-  if (dbGetQuery(db, "SELECT COUNT(DISTINCT mdir) FROM Maplist") > 1000){
-    mdir <- (dbGetQuery(db, "SELECT min(mdir), count(*) AS filecount 
+  if (RSQLite::dbGetQuery(db, "SELECT COUNT(DISTINCT mdir) FROM Maplist") > 1000){
+    mdir <- (RSQLite::dbGetQuery(db, "SELECT min(mdir), count(*) AS filecount 
                         FROM Maplist 
                         GROUP BY mdir 
                         ORDER BY filecount ASC
                         LIMIT 5"))[1]
-    mfile <- paste0((dbGetQuery(db, "SELECT MAX(mfile) FROM Maplist") + 1))
+    mfile <- paste0((RSQLite::dbGetQuery(db, "SELECT MAX(mfile) FROM Maplist") + 1))
   }
   
   # Passing new record to the database
-  dbSendQuery(db, paste0("INSERT INTO Maplist (
+  RSQLite::dbSendQuery(db, paste0("INSERT INTO Maplist (
                          bbox1,
                          bbox2,
                          bbox3,
@@ -287,7 +287,7 @@ validate_mapid <- function(map_data = "extdata")
   
   # Fetching the full file paths based on the database entries
   mapl <- dbGetQuery(db, "SELECT * FROM Maplist")
-  mapl_path <- paste0(map_data,"/Tiles_", mapl$mdir,"/", mapl$mfile,".", mapl$extens) 
+  mapl_path <- system.file(paste0(map_data,"/Tiles_",mapl$mdir), paste0(mapl$mfile,".",mapl$extens), package = "gisserver" )
   mapl <- cbind(mapl, mapl_path)
   
   # Fetching the full file paths based on a query from the server map directories

@@ -125,7 +125,7 @@ get_background <- function(xy, map_data = "inst/extdata", mapdb_name = "MapID.db
   # Coordinates of the network nodes are being transformed to the coordinate reference system of the map 
   # The bounding box (extent) is being constructed, and the database is queried for maps that encompass the graph
   
-  sp::coordinates(xy) <- ~Longitude + Latitude
+  sp::coordinates(xy) <- ~ Longitude + Latitude
   sp::proj4string(xy) <- sp::CRS(proj)
   xy <- sp::spTransform(xy, CRSobj = init_proj)
   ext_map <- raster::extent(xy)
