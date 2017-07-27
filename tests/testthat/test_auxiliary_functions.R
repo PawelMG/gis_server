@@ -50,7 +50,7 @@ test_that("check_map delivers correct results",{
 test_that("render_map runs without errors",{
   db <- establish_con()
     with_mock(
-    'base::shell' = function(x, ...) TRUE,
+    'base::system' = function(x, ...) TRUE,
     'base::file.remove' = function(x, ...) TRUE,
     expect_true(render_map(map_data = "extdata", ext_map = ext_map, options_list = options_list, db))
   )
@@ -109,7 +109,7 @@ test_that("validate_mapid runs without errors",{
     'base::file.remove' = function(x, ...) TRUE,
     'base::file.rename' = function(x, ...) TRUE,
     'base::file.copy' = function(x, ...) TRUE,
-    'base::shell' = function(x, ...) TRUE,
+    'base::system' = function(x, ...) TRUE,
     expect_equal(length(validate_mapid(map_data = "extdata")),1)
   )
 })

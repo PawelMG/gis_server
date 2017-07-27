@@ -111,7 +111,7 @@ test_that("get_background fetches adequate results - case 3",{
                         force_rend = TRUE)
     
   with_mock(
-    'base::shell' = function(x, ...) TRUE,
+    'base::system' = function(x, ...) TRUE,
     'base::file.remove' = function(x, ...) TRUE,
 
     a <- get_background(xy = xy,

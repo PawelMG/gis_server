@@ -83,7 +83,7 @@ render_map <- function (map_data, ext_map, options_list = NULL, db)
   b_box = paste(ext_map[1], ext_map[3], ext_map[2], ext_map[4], collapse = " ")
   
   # Calling the rendering engine 
-  shell(paste0("nik4.py --bbox ", b_box ,
+  system(paste0("nik4.py --bbox ", b_box ,
                " --scale ", def_options$mscale," --dpi ", def_options$dpi," ",
                ifelse(def_options$url, paste0(" --url ", def_options$url), " "),
                ifelse(def_options$size, paste0(" --size ", def_options$size), " "),
