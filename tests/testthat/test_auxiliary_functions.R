@@ -79,7 +79,6 @@ test_that("display map info produces adequate results", {
 
 test_that("display map produces adequate results", {
   expect_output(print(class(display_map(id = 1))),regexp = "NULL*")
-  
 })
 
 test_that("delete_map function works properly",{
@@ -100,10 +99,21 @@ test_that("extent_margin functions properly",{
 	  expect_equal(extent_margin(ext_map,0), ext_map)
 })
 
-test_that("load_map functions properly",{
+test_that("display_map_info functions properly",{
   mapl <- display_map_info(map_data = "extdata")
   expect_gt(nrow(mapl),0)
   })
+
+test_that("validate_mapid runs without errors",{
+  with_mock(
+    'base::file.remove' = function(x, ...) TRUE,
+    'base::file.rename' = function(x, ...) TRUE,
+    'base::file.copy' = function(x, ...) TRUE,
+    'base::shell' = function(x, ...) TRUE,
+    expect_equal(length(validate_mapid(map_data = "extdata")),1)
+  )
+})
+
 
 db <- establish_con()
 dbSendQuery(db, 'DELETE FROM Maplist WHERE id>1')
