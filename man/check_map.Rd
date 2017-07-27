@@ -4,7 +4,7 @@
 \alias{check_map}
 \title{Checks whether the desired map background is available.}
 \usage{
-check_map(db, ext_map, options_list = NULL)
+check_map(db, ext_map, options_list = NULL, sel = FALSE)
 }
 \arguments{
 \item{db}{a SQLiteConnection object that specifies the connection to the database.}

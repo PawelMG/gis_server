@@ -14,7 +14,7 @@
 #' @return mapl     a data frame holding one record from the map database.
 #' @keywords internal
 
-check_map <- function(db, ext_map, options_list = NULL) 
+check_map <- function(db, ext_map, options_list = NULL, sel = FALSE) 
 {
   mapl <- RSQLite::dbGetQuery(db, paste0("SELECT * FROM Maplist WHERE bbox1<='", ext_map[1],
                                 "' AND bbox2<='", ext_map[3],
@@ -23,8 +23,11 @@ check_map <- function(db, ext_map, options_list = NULL)
                                 "' AND SCALE ='", options_list$mscale,"'"))    
   
   if (nrow(mapl) > 1){
+	if (sel){
     x <- readline("Which map to choose (enter the desired map's ID)?")    
     mapl <- mapl[mapl$ID==x]
+	}
+	mapl <- mapl[mapl$ID==min(mapl$ID)]
   }
   if (nrow(mapl) == 0) {
     mapl <- FALSE
@@ -115,13 +118,13 @@ render_map <- function (map_data, ext_map, options_list = NULL, db)
 save_map <- function(db, init_proj, ext_map, map_data, options_list = NULL)
 {
   # Checking if there is a single map file in the rendering output folder (./ttemp)
-  if (!length(list.files(paste0(map_data,"/ttemp")))==1){
+  if (!length(list.files(system.file(paste0(map_data,"/ttemp"), paste0(""), package = "gisserver")))==1){
     stop("Error! The temp folder holds an inappropriate number of files --- please investigate and leave a single appropriate map file!")    
   }
   
   # Function creating a full file name based on the name stored in the database
   pathname <- function(x){
-    paste0(map_data,"/Tiles_", x)   
+    system.file(paste0(map_data,"/Tiles_", x), paste0(""), package = "gisserver")  
   }
   
   # Extracting the extension of the map file based on the output options 	
@@ -129,9 +132,9 @@ save_map <- function(db, init_proj, ext_map, map_data, options_list = NULL)
   extens <- as.character(save_name[[1]][2])
   
   # Setting the storage path and filename  
-  if (dbGetQuery(db, "SELECT COUNT(DISTINCT mdir) FROM Maplist") <= 1000){
-    mdir <- paste0(RSQLite::dbGetQuery(db, "SELECT MAX(mdir) FROM Maplist") + 1)
-    mfile <- paste0((RSQLite::dbGetQuery(db, "SELECT MAX(mfile) FROM Maplist") + 1))
+  if (RSQLite::dbGetQuery(db, "SELECT COUNT(DISTINCT mdir) FROM Maplist") <= 1000){
+    mdir <- paste0(as.numeric(RSQLite::dbGetQuery(db, "SELECT MAX(mdir) FROM Maplist")) + 1)
+    mfile <- paste0(as.numeric(RSQLite::dbGetQuery(db, "SELECT MAX(mfile) FROM Maplist")) + 1)
   }
   
   if (RSQLite::dbGetQuery(db, "SELECT COUNT(DISTINCT mdir) FROM Maplist") > 1000){
@@ -140,11 +143,12 @@ save_map <- function(db, init_proj, ext_map, map_data, options_list = NULL)
                         GROUP BY mdir 
                         ORDER BY filecount ASC
                         LIMIT 5"))[1]
-    mfile <- paste0((RSQLite::dbGetQuery(db, "SELECT MAX(mfile) FROM Maplist") + 1))
+    mfile <- paste0(as.numeric(RSQLite::dbGetQuery(db, "SELECT MAX(mfile) FROM Maplist")) + 1)
   }
   
   # Passing new record to the database
   RSQLite::dbSendQuery(db, paste0("INSERT INTO Maplist (
+                         id,
                          bbox1,
                          bbox2,
                          bbox3,
@@ -159,7 +163,8 @@ save_map <- function(db, init_proj, ext_map, map_data, options_list = NULL)
                          mfile,
                          extens) 
                          VALUES (
-                         '",ext_map[1],"' ,'",
+                         '",mdir,"' ,'",
+                         ext_map[1],"' ,'",
                          ext_map[3],"' ,'",
                          ext_map[2],"' ,'",
                          ext_map[4],"' , '",
@@ -174,12 +179,13 @@ save_map <- function(db, init_proj, ext_map, map_data, options_list = NULL)
                          extens,"')"))
   
   # File manipulation - storing the map file in the folder specified earlier, setting the name and clearing the ttemp folder. 		
-  file.rename(list.files(paste0(map_data,"/ttemp"), full.names = T ), paste0(map_data,"/ttemp/",mfile,".",extens))
-  file.copy(list.files(paste0(map_data,"/ttemp"), full.names = T ), pathname(mdir))
-  file.remove(list.files(paste0(map_data,"/ttemp"), full.names = T))
+  file.rename(list.files(paste0(system.file(paste0(map_data,"/ttemp"), paste0(""), package = "gisserver")), full.names = T ),
+              paste0(system.file(paste0(map_data,"/ttemp"), paste0(mfile,".",extens), package = "gisserver")))
+  file.copy(list.files(paste0(system.file(paste0(map_data,"/ttemp"), paste0(""), package = "gisserver")), full.names = T ), pathname(mdir))
+  file.remove(list.files(paste0(system.file(paste0(map_data,"/ttemp"), paste0(""), package = "gisserver")), full.names = T))
   
   # Returning the last record from the database, covering the saved file -- the record gives sufficient information to load the map. 
-  mapl <- dbGetQuery(db, "SELECT * FROM Maplist WHERE ID = (SELECT MAX(ID) FROM Maplist)")
+  mapl <- RSQLite::dbGetQuery(db, "SELECT * FROM Maplist WHERE ID = (SELECT MAX(ID) FROM Maplist)")
   return(mapl)    
 }
 #####################################################################
@@ -200,7 +206,7 @@ save_map <- function(db, init_proj, ext_map, map_data, options_list = NULL)
 load_map <- function(mapl, map_data, ext_map)
 {
   # Loading the file
-  gmap <- brick( system.file(paste0(map_data,"/Tiles_",mapl$mdir), paste0(mapl$mfile,".",mapl$extens), package = "gisserver" ))
+  gmap <- brick(system.file(paste0(map_data,"/Tiles_",mapl$mdir), paste0(mapl$mfile,".",mapl$extens), package = "gisserver" ))
   
   # Assigning spatial attributes to the map
   ext <- extent(c(mapl$bbox1, mapl$bbox3, mapl$bbox2, mapl$bbox4))

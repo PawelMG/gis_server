@@ -90,7 +90,7 @@
 #' 
 #' ###########################################################
 
-get_background <- function(xy, map_data = "inst/extdata", mapdb_name = "MapID.db", proj, init_proj, options_list = NULL)
+get_background <- function(xy, map_data = "extdata", mapdb_name = "MapID.db", proj, init_proj, options_list = NULL)
 {
   
   # Specifying default rendering options

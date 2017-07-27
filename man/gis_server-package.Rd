@@ -4,7 +4,7 @@
 \alias{get_background}
 \title{Locally storing and rendering OSM maps.}
 \usage{
-get_background(xy, map_data = "inst/extdata", mapdb_name = "MapID.db", proj,
+get_background(xy, map_data = "extdata", mapdb_name = "MapID.db", proj,
   init_proj, options_list = NULL)
 }
 \arguments{
